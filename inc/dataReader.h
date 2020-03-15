@@ -8,3 +8,5 @@
 
 #define KEY_PATH     "/home/gabsantana/Downloads"
 #define MSG_ID_ERROR -1
+
+#define TIMEOUT       15

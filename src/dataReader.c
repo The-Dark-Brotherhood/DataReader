@@ -24,5 +24,8 @@ int main(int argc, char const *argv[])
 
   // Create master list (shared memory)
 
+  // Sleep for timeout seconds
+  sleep(TIMEOUT);
+
   return 0;
 }
