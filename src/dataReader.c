@@ -1,6 +1,6 @@
-##include "dataReader.h"
+#include "../inc/dataReader.h"
 
-int int main(int argc, char const *argv[]) {
+int main(int argc, char const *argv[]) {
   printf("Hello World");
   return 0;
 }
