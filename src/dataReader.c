@@ -24,7 +24,5 @@ int main(int argc, char const *argv[])
 
   // Create master list (shared memory)
 
-  // Wait 15 seconds 
-
   return 0;
 }
