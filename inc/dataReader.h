@@ -16,9 +16,9 @@
 #define SHM_KEYID     16535
 
 // in seconds
-#define TIMEOUT       15
-#define EXIT_DELAY    8       // DEBUG: Check if this is right for closing the server
-
+#define TIMEOUT       5       
+#define EXIT_DELAY    35       // Check if this is right for closing the server
+#define MSG_DELAY     1.5
 
 // Structures
 //--> Message QUEUE

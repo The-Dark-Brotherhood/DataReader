@@ -1,11 +1,10 @@
 #include "../inc/dataReader.h"
 void processMessage(MasterList* list, msgData msg);   //DEBUG:
 
-
 int main(int argc, char const *argv[])
 {
   // MESSAGE QUEUE;
-  // Grabs key and check for existing queue, creates if necessary
+  // Generate key
   key_t msgKey = ftok(KEY_PATH, 'G');
   int msgID = 0;
 
@@ -15,7 +14,7 @@ int main(int argc, char const *argv[])
     return ID_ERROR;
   }
 
-  // Grab or Create message key
+  // Creates or Grab message queue
   msgID = msgget(msgKey, 0);
   if(msgID == -1)
   {
@@ -30,7 +29,7 @@ int main(int argc, char const *argv[])
   printf("DEBUG MESSAGE ID: %d\n", msgID );
 
   // MASTER LIST;
-  // Grabs key and check for existing shared memory, creates if necessary
+  // Generattes key
   key_t shmKey = ftok(KEY_PATH, SHM_KEYID);
   int shmID = 0;
   if(shmKey == ID_ERROR)
@@ -39,7 +38,7 @@ int main(int argc, char const *argv[])
     return ID_ERROR;
   }
 
-  // Grab or Create shared memory
+  // Creates or Grabs shared memory
   MasterList* shList = NULL;
   shmID = shmget(shmKey, sizeof(MasterList), 0);
   printf("DEBUG SHM ID: %d\n", shmID);
@@ -52,27 +51,33 @@ int main(int argc, char const *argv[])
       return errno;
     }
   }
-  //--> Create master list: keeps tracks of the clients connect to the queue
-  shList = (MasterList*)shmat (shmID, NULL, 0);
-  shList->msgQueueID = msgID;
 
-  // Sleep for timeout seconds
-  printf("Waiting for %d...\n", TIMEOUT);
-  sleep(TIMEOUT - 10);
-  printf("NOW\n" );
+  /*
+  //DEBUG: Clean up
+  msgctl (msgID, IPC_RMID, (struct msqid_ds*)NULL);
+  shmdt(shList);
+  shmctl (shmID, IPC_RMID, 0);
+  */
 
-  // Listening loop
+  //--> Listening loop
+  shList = (MasterList*)shmat (shmID, NULL, 0);       // Grabs the shared memory and
+  shList->msgQueueID = msgID;                         // Assign the message queue ID
+
+  printf("Waiting for %d seconds\n", TIMEOUT);        // Wait for clients to start
+  sleep(TIMEOUT);
+
   msgData msg;
   int msgSize = sizeof(msgData) - sizeof(long);
 
-  time_t start_t = time(NULL);
-  while((int)difftime(time(NULL), start_t) < 10)
+  time_t startTime = time(NULL);                      // Listen for messages loop
+  while((int)difftime(time(NULL), startTime) < 10)
   {
-  //  if(msgrcv(msgID, &msg, msgSize, 10, IPC_NOWAIT) == -1)
+  if(msgrcv(msgID, &msg, msgSize, 10, IPC_NOWAIT) == -1)
     {
-      printf("How\n" );
-      //processMessage(shList, msg);
-      sleep(1);   // DEBUG: Change to 1.5 segundos
+      processMessage(shList, msg);
+      printf("==> Wait for %.2f sec\n", MSG_DELAY);
+      sleep(MSG_DELAY);
+      startTime = time(NULL);
     }
   }
 
