@@ -3,20 +3,35 @@
 #include <errno.h>
 #include <string.h>
 #include <unistd.h>
+#include <time.h>
 #include <sys/types.h>
 #include <sys/ipc.h>
 #include <sys/msg.h>
 #include <sys/shm.h>
 
+// Constants
 #define KEY_PATH     "/home/gabsantana/Downloads"
 #define ID_ERROR      -1
 
 #define SHM_KEYID     16535
 
+// in seconds
 #define TIMEOUT       15
+#define EXIT_DELAY    8       // DEBUG: Check if this is right for closing the server
 
+
+// Structures
+//--> Message QUEUE
+#define MSG_LEN 121
+typedef struct
+{
+  long msgType;
+  pid_t clientId;
+  char msgContent[MSG_LEN];
+} msgData;
+
+//--> Shared Memory
 #define MAX_DC_ROLES  10
-
 typedef struct
 {
   pid_t dcProcessID;
