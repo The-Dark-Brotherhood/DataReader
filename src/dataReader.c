@@ -1,5 +1,5 @@
 #include "../inc/dataReader.h"
-void processMessage(MasterList* list, msgData msg);   //DEBUG:
+
 
 int main(int argc, char const *argv[])
 {
@@ -70,11 +70,14 @@ int main(int argc, char const *argv[])
   int msgSize = sizeof(msgData) - sizeof(long);
 
   time_t startTime = time(NULL);                      // Listen for messages loop
-  while((int)difftime(time(NULL), startTime) < 10)
+  while((int)difftime(time(NULL), startTime) < 10)    // DEBUG: Change to timeout
   {
-  if(msgrcv(msgID, &msg, msgSize, 10, IPC_NOWAIT) == -1)
+    // Process messages if received and it is able to add to the master list
+    if(msgrcv(msgID, &msg, msgSize, 10, IPC_NOWAIT) != -1 &&    // DEBUG: Change message type (10)
+       addToMasterlist(msg.clientId, shList) != -1)
     {
       processMessage(shList, msg);
+
       printf("==> Wait for %.2f sec\n", MSG_DELAY);
       sleep(MSG_DELAY);
       startTime = time(NULL);
@@ -88,13 +91,4 @@ int main(int argc, char const *argv[])
   shmctl (shmID, IPC_RMID, 0);
 
   return 0;
-}
-
-
-void processMessage(MasterList* list, msgData msg)
-{
-  list->numberOfDCs++;
-  int lastDCindex = list->numberOfDCs - 1;
-  list->dc[lastDCindex].dcProcessID = msg.clientId;
-  printf("Received Process ID: %d\n", (int)list->dc[lastDCindex].dcProcessID);
 }
