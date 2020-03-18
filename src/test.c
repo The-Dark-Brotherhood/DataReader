@@ -1,95 +1,227 @@
 #include "../inc/dataReader.h"
 
 // testAddToList
-void testAddToList();
-
-
+void testListExistingElement();
+void testListNewElementBegin();
+void testListNewElementEnd();
+void testListNewElementMiddle();
+void testAddFullList();
+void testListDeleteElement();
+void testListDeleteFirstElement();
+void testListDeleteLastElement();
 
 int main(void)
 {
-  //testAddToList();
-  testAddToList();
+  testListNewElementBegin();
+  testListExistingElement();
+  testListNewElementEnd();
+  testListNewElementMiddle();
+  testAddFullList();
+  testListDeleteElement();
+  testListDeleteFirstElement();
+  testListDeleteLastElement();
+
   return 0;
 }
 
-void testAddToList()
+void testListNewElementBegin()
 {
   // Create list
-  printf("TEST 1:\nReturns -1 if the server list is full, 1 if the element already exists and its time was updated,\n 0 if the element was added to the list\n");
-  MasterList* list = malloc(20 * sizeof(DCInfo));
+  printf("======\nTEST : Add a new element at the beginning of the list\n");
+  printf("Returns -1 if the server list is full, \n1 if the element already exists and its time was updated\n");
+  printf("0 if the element was added to the list\n======\n");
 
   // Create and insert dummy data
+  MasterList* list = malloc(20 * sizeof(DCInfo));
+  list->head = NULL;
+  for(int i = 2; i <= 5; i++)
+  {
+    DCInfo* currentNode = createAndSetNode(i);
+    insertNodeToList(list, currentNode);
+  }
+
+  // Insert new node
+  DCInfo* node = createAndSetNode(1);
+  int retCode = insertNodeToList(list, node);
+
+  printf("==> Expected: 0 -- Result: %d\n\n", retCode);
+  free(list);
+}
+
+void testListExistingElement()
+{
+  // Create list
+  printf("======\nTEST : Add an element that already exists\n");
+  printf("Returns -1 if the server list is full, \n1 if the element already exists and its time was updated\n");
+  printf("0 if the element was added to the list\n======\n");
+
+  // Create and insert dummy data
+  MasterList* list = malloc(20 * sizeof(DCInfo));
   list->head = NULL;
   for(int i = 1; i <= 5; i++)
   {
     DCInfo* currentNode = createAndSetNode(i);
     insertNodeToList(list, currentNode);
   }
+
   // Insert new node
-  DCInfo* node = createAndSetNode(1);
+  DCInfo* node = createAndSetNode(5);
   int retCode = insertNodeToList(list, node);
 
-  printLists(list->head);
-  printf("==> Result: %d\n", retCode);
-
+  printf("==> Expected: 1 -- Result: %d\n\n", retCode);
   free(list);
 }
 
-
-/*
-int testAddToFullList(void)
+void testAddFullList()
 {
-  printf("TEST 1:\n");
-  // Insert Data
+  // Create list
+  printf("======\nTEST : Add an element to a full list\n");
+  printf("Returns -1 if the server list is full, \n1 if the element already exists and its time was updated\n");
+  printf("0 if the element was added to the list\n======\n");
+
+  // Create and insert dummy data
   MasterList* list = malloc(20 * sizeof(DCInfo));
-  list->dc[0].dcProcessID = (pid_t)3;
-  list->dc[0].lastTimeHeardFrom = time(NULL);
-  list->numberOfDCs = 10;
-
-  pid_t newClient = 10;
-
-  // Run function
-  int expected = -1;     // Already exists
-  int retCode = addToMasterlist(newClient, list);
-  printf("Result from Function:%d\n &--> %d [1(TRUE) & 0(FALSE)]\n", retCode, expected == retCode);
-
-  free(list);
-  return 0;
-}
-
-int testCheckForInactivity(void)
-{
-  printf("TEST 2:\n");
-
-  // Insert Data
-  MasterList* list = malloc(20 * sizeof(DCInfo));
-  list->dc[0].dcProcessID = (pid_t)10;
-  list->dc[0].lastTimeHeardFrom = time(NULL);
-  list->dc[1].dcProcessID = (pid_t)11;
-  list->dc[1].lastTimeHeardFrom = time(NULL);
-  list->dc[2].dcProcessID = (pid_t)12;
-  list->dc[2].lastTimeHeardFrom = time(NULL);
-  list->numberOfDCs = 3;
-  int counter = 0;
-  // Print every element in the shared list
-  while(counter < 3)
+  list->head = NULL;
+  for(int i = 1; i <= MAX_DC_ROLES; i++)
   {
-    for(int i = 0; i < list->numberOfDCs; i++)
-    {
-      printf("== Element #%d\n", list->dc[i].dcProcessID);
-      printf("   Last time heard from: %d\n",(int)difftime(time(NULL), list->dc[i].lastTimeHeardFrom));
-    }
-    sleep(5);
-    checkInactivity(list);
-    counter++;
+    DCInfo* currentNode = createAndSetNode(i);
+    insertNodeToList(list, currentNode);
   }
 
-  printf("\nResult: %d\n", list->dc[0].dcProcessID );
-  printf("\nResult: %d\n", list->dc[1].dcProcessID );
-  printf("\nResult: %d\n", list->dc[2].dcProcessID );
+  // Insert new node
+  DCInfo* node = createAndSetNode(20);
+  int retCode = insertNodeToList(list, node);
 
-  // Cleanup
+  printf("==> Expected: -1 -- Result: %d\n\n", retCode);
   free(list);
-  return 0;
 }
-*/
+
+void testListNewElementEnd()
+{
+  // Create list
+  printf("======\nTEST : Add a new element in the end of the list\n");
+  printf("Returns -1 if the server list is full, \n1 if the element already exists and its time was updated\n");
+  printf("0 if the element was added to the list\n======\n");
+
+  // Create and insert dummy data
+  MasterList* list = malloc(20 * sizeof(DCInfo));
+  list->head = NULL;
+  for(int i = 1; i <= 5; i++)
+  {
+    DCInfo* currentNode = createAndSetNode(i);
+    insertNodeToList(list, currentNode);
+  }
+
+  // Insert new node
+  DCInfo* node = createAndSetNode(6);
+  int retCode = insertNodeToList(list, node);
+
+  printf("==> Expected: 0 -- Result: %d\n\n", retCode);
+  free(list);
+}
+
+void testListNewElementMiddle()
+{
+  // Create list
+  printf("======\nTEST : Add a new element in the middle of the list\n");
+  printf("Returns -1 if the server list is full, \n1 if the element already exists and its time was updated\n");
+  printf("0 if the element was added to the list\n======\n");
+
+  // Create and insert dummy data
+  MasterList* list = malloc(20 * sizeof(DCInfo));
+  list->head = NULL;
+  for(int i = 1; i <= 5; i++)
+  {
+    DCInfo* currentNode = createAndSetNode(i);
+    insertNodeToList(list, currentNode);
+  }
+
+  DCInfo* currentNode = createAndSetNode(7);
+  insertNodeToList(list, currentNode);
+
+  // Insert new node
+  DCInfo* node = createAndSetNode(6);
+  int retCode = insertNodeToList(list, node);
+
+  printf("==> Expected: 0 -- Result: %d\n\n", retCode);
+  free(list);
+}
+
+void testListDeleteElement()
+{
+  // Create list
+  printf("======\nTEST : Remove an element in the middle of the list\n");
+
+  // Create and insert dummy data
+  MasterList* list = malloc(20 * sizeof(DCInfo));
+  list->head = NULL;
+  for(int i = 1; i <= 5; i++)
+  {
+    DCInfo* currentNode = createAndSetNode(i);
+    insertNodeToList(list, currentNode);
+  }
+  printLists(list->head);
+  printf("\n= After");
+
+  // Insert new node
+  DCInfo* nodeToDelete = findClient(list->head, 3);
+  deleteNode(list, nodeToDelete);
+
+  printLists(list->head);
+  printf("Expected: 4 -- Result: %d\n\n", list->numberOfDCs );
+
+  //printf("==> Expected:  -- Result: %d\n\n", retCode);
+  free(list);
+}
+
+void testListDeleteFirstElement()
+{
+  // Create list
+  printf("======\nTEST : Remove the first element of the list\n");
+
+  // Create and insert dummy data
+  MasterList* list = malloc(20 * sizeof(DCInfo));
+  list->head = NULL;
+  for(int i = 1; i <= 5; i++)
+  {
+    DCInfo* currentNode = createAndSetNode(i);
+    insertNodeToList(list, currentNode);
+  }
+  printLists(list->head);
+  printf("\n= After");
+
+  // Insert new node
+  DCInfo* nodeToDelete = findClient(list->head, 1);
+  deleteNode(list, nodeToDelete);
+
+  printLists(list->head);
+  printf("Expected: 4 -- Result: %d\n\n", list->numberOfDCs );
+
+  free(list);
+}
+
+void testListDeleteLastElement()
+{
+  // Create list
+  printf("======\nTEST : Remove the last element of the list\n");
+
+  // Create and insert dummy data
+  MasterList* list = malloc(20 * sizeof(DCInfo));
+  list->head = NULL;
+  for(int i = 1; i <= 5; i++)
+  {
+    DCInfo* currentNode = createAndSetNode(i);
+    insertNodeToList(list, currentNode);
+  }
+  printLists(list->head);
+  printf("\n= After");
+
+  // Insert new node
+  DCInfo* nodeToDelete = findClient(list->head, 5);
+  deleteNode(list, nodeToDelete);
+
+  printLists(list->head);
+  printf("Expected: 4 -- Result: %d\n\n", list->numberOfDCs );
+
+  free(list);
+}

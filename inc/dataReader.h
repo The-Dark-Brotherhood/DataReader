@@ -63,5 +63,5 @@ DCInfo* createAndSetNode(int clientId);
 void printLists(DCInfo* head);
 DCInfo* findClient(DCInfo* head, int clientId);
 int insertNodeToList(MasterList* list, DCInfo* node);
-void deleteNode(DCInfo* node, DCInfo** head, DCInfo** tail);
+void deleteNode(MasterList* list, DCInfo* node);
 void freeLinkedList(DCInfo* head);

@@ -61,6 +61,11 @@ int insertNodeToList(MasterList* list, DCInfo* node)
 		*head = *tail = node;
     list->numberOfDCs++;
 	}
+	// Element being added is the first element
+	else if((*head)->dcProcessID == node->dcProcessID)
+	{
+		(*head)->lastTimeHeardFrom = time(NULL);
+	}
 	// New node that goes in the beginning of the list --> Replace head node
 	else if (node->dcProcessID < (*head)->dcProcessID)
 	{
@@ -78,17 +83,15 @@ int insertNodeToList(MasterList* list, DCInfo* node)
 		DCInfo* postNode = (*head)->next;
 
     // Transverse through the list
-		while (postNode != NULL && postNode->dcProcessID < node->dcProcessID)
+		while (postNode != NULL && postNode->dcProcessID <= node->dcProcessID)
 		{
+			if(postNode->dcProcessID == node->dcProcessID)
+			{
+				postNode->lastTimeHeardFrom = time(NULL);
+				return 1;
+			}
 			preNode  = postNode;
 			postNode = preNode->next;
-		}
-
-		// If node is on the list --> Refresh time
-		if(preNode->dcProcessID == node->dcProcessID)
-		{
-			postNode->lastTimeHeardFrom = time(NULL);
-			return 1;
 		}
 
     // Check if the server is full
@@ -170,8 +173,11 @@ DCInfo* findClient(DCInfo* head, int clientId)
 //
 // RETURNS       :
 //	NOTHING
-void deleteNode(DCInfo* node, DCInfo** head, DCInfo** tail)
+void deleteNode(MasterList* list, DCInfo* node)
 {
+	DCInfo** head = &(list->head);
+	DCInfo** tail = &(list->tail);
+
 	if (node == *head)
 	{
 		*head = node->next;
@@ -199,7 +205,7 @@ void deleteNode(DCInfo* node, DCInfo** head, DCInfo** tail)
 			postNode->prev = preNode;
 		}
 	}
-
+	list->numberOfDCs--;
 	free(node);
 }
 
