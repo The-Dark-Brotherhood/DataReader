@@ -1,8 +1,9 @@
 #include "../inc/dataReader.h"
 
+/*
 int addToMasterlist(pid_t newClientPID, MasterList* list)
 {
-  int numClients = list->numberOfDCs;
+  const int numClients = list->numberOfDCs;
 
    // Server is full
   if(list->numberOfDCs == MAX_DC_ROLES)
@@ -27,6 +28,20 @@ int addToMasterlist(pid_t newClientPID, MasterList* list)
   return 0;
 }
 
+// DEBUG: Does it have to be in order (the DCs)
+void checkInactivity(MasterList* list)
+{
+  for(int counter = 0; counter < list->numberOfDCs; counter++)
+  {
+    // Remove if the last time heard from is bigger or equal to allowed delay
+    if((int)difftime(time(NULL), list->dc[counter].lastTimeHeardFrom) >= EXIT_DELAY)
+    {
+      list->dc[counter] = list->dc[list->numberOfDCs - 1];  // Replace with the last element
+      list->numberOfDCs--;                                // Resize array
+    }
+  }
+}
+
 void processMessage(MasterList* list, msgData msg)
 {
   list->numberOfDCs++;
@@ -34,3 +49,4 @@ void processMessage(MasterList* list, msgData msg)
   list->dc[lastDCindex].dcProcessID = msg.clientId;
   printf("Received Process ID: %d\n", (int)list->dc[lastDCindex].dcProcessID);
 }
+*/

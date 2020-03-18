@@ -77,7 +77,7 @@ int main(int argc, char const *argv[])
        addToMasterlist(msg.clientId, shList) != -1)
     {
       processMessage(shList, msg);
-
+      checkInactivity(shList);
       printf("==> Wait for %.2f sec\n", MSG_DELAY);
       sleep(MSG_DELAY);
       startTime = time(NULL);
