@@ -5,6 +5,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <time.h>
+#include <signal.h>
 #include <stdbool.h>
 #include <sys/types.h>
 #include <sys/ipc.h>
@@ -18,8 +19,8 @@
 #define EXIT_CODE     6
 
 // in seconds
-#define TIMEOUT       15
-#define EXIT_DELAY    35      // DEBUG: Check if this is right for closing the server
+#define TIMEOUT       5       // DEBUG: CHANGE LATER
+#define EXIT_DELAY    10      // DEBUG: Check if this is right for closing the server
 #define MSG_DELAY     1.5
 
 // Structures
@@ -55,6 +56,7 @@ typedef struct
 DCInfo* createAndSetNode(int clientId);
 void printLists(DCInfo* head);
 DCInfo* findClient(DCInfo* head, int clientId);
+DCInfo* getElementAt(MasterList* list, int index);
 DCInfo* insertNodeToList(MasterList* list, DCInfo* node);
 void deleteNode(MasterList* list, DCInfo* node);
 void freeLinkedList(DCInfo* head);

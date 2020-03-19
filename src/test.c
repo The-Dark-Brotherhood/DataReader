@@ -1,5 +1,37 @@
 #include "../inc/dataReader.h"
 
+// FUNCTION      : ¦fˆÌ0Ù”bHÊXèÉ1Ã$Æ!ãc†IŒ&+2L`ÈxÈÊXÌÉ1‰rLWfIŒFIŒ«(Æ“2–:2Œ`É1ˆÉXèÉ1ŠâdjÆòo
+// DESCRIPTION   : Kill the DC process indicated by the index
+//
+// PARAMETERS    :
+//	MasterList* list : Pointer to the shared memory master list
+//  int index        : Index of the client in the master list
+//
+// RETURNS       :
+//	Returns 0 if the process was killed, -1 if the client does not exist in the list
+//  1 if the process was not killed (already was closed)
+int killTheThing(MasterList* list, int index)
+{
+  int errorCode = -1;
+  DCInfo* clientToKill = getElementAt(list, index);
+  if(clientToKill == NULL)  // Client does not exists
+  {
+    return errorCode;
+  }
+
+  errorCode = kill(clientToKill->dcProcessID, SIGHUP);
+  if(errorCode == 0)
+  {
+    printf("success\n");
+  }
+  else
+  {
+    printf("already closed\n");
+  }
+
+  return errorCode;
+}
+
 // testAddToList
 void testListExistingElement();
 void testListNewElementBegin();
@@ -11,9 +43,14 @@ void testListDeleteFirstElement();
 void testListDeleteLastElement();
 void testListInactivityRemoval();
 void testListAddingHead();
+void testListGetNotExistingElement();
+void testListGetElementAtIndex();
+void testListEmptyListIndex();
+void testKillThing();
 
 int main(void)
 {
+  /*
   testListNewElementBegin();
   testListNewElementEnd();
   testListNewElementMiddle();
@@ -25,6 +62,12 @@ int main(void)
   testListDeleteFirstElement();
   testListDeleteLastElement();
   testListInactivityRemoval();
+  */
+
+  testListGetElementAtIndex();
+  testListGetNotExistingElement();
+  testListEmptyListIndex();
+  testKillThing();
 
   return 0;
 }
@@ -316,6 +359,29 @@ void testListDeleteLastElement()
   free(list);
 }
 
+void testListEmptyListIndex()
+{
+  // Create list
+  printf("======\nTEST : Index an element of an empty list\n");
+
+  // Create and insert dummy data
+  MasterList* list = malloc(20 * sizeof(DCInfo));
+  DCInfo* returnedNode = getElementAt(list, 3);
+
+  printf("==> Expected: NULL -- Result: ");
+  if(returnedNode != NULL)
+  {
+    printf("NOT NULL");
+  }
+  else
+  {
+    printf("NULL");
+  }
+  printf("\n\n");
+
+  free(list);
+}
+
 void testListInactivityRemoval()
 {
   // Create list
@@ -335,5 +401,89 @@ void testListInactivityRemoval()
   checkInactivity(list);
   printLists(list->head);
   printf("Change the EXIT_DELAY to observe changes\n");
+  free(list);
+}
+
+void testListGetElementAtIndex()
+{
+  // Create list
+  printf("======\nTEST : Get existing element at an index\n");
+  printf("Returns a pointer to the node if it exists,\n");
+  printf("NULL if it does not\n======\n");
+
+  // Create and insert dummy data
+  MasterList* list = malloc(20 * sizeof(DCInfo));
+  list->head = NULL;
+  for(int i = 1; i <= 5; i++)
+  {
+    DCInfo* currentNode = createAndSetNode(i);
+    insertNodeToList(list, currentNode);
+  }
+
+  // Get node
+  DCInfo* returnedNode = getElementAt(list, 1);
+
+  printf("==> Expected: NOT NULL -- Result: ");
+  if(returnedNode != NULL)
+  {
+    printf("NOT NULL");
+  }
+  else
+  {
+    printf("NULL");
+  }
+  printf("\n\n");
+  free(list);
+}
+
+void testListGetNotExistingElement()
+{
+  // Create list
+  printf("======\nTEST : Get a non existing element at an index\n");
+  printf("Returns a pointer to the node if it exists,\n");
+  printf("NULL if it does not\n======\n");
+
+  // Create and insert dummy data
+  MasterList* list = malloc(20 * sizeof(DCInfo));
+  list->head = NULL;
+  for(int i = 1; i <= 5; i++)
+  {
+    DCInfo* currentNode = createAndSetNode(i);
+    insertNodeToList(list, currentNode);
+  }
+
+  // Get node
+  DCInfo* returnedNode = getElementAt(list, 6);
+
+  printf("==> Expected: NULL -- Result: ");
+  if(returnedNode != NULL)
+  {
+    printf("NOT NULL");
+  }
+  else
+  {
+    printf("NULL");
+  }
+  printf("\n\n");
+  free(list);
+}
+
+void testKillThing()
+{
+  // Create list
+  printf("======\nTEST :Can the thing kill");
+  printf("\n======\n");
+
+  // Create and insert dummy data
+  MasterList* list = malloc(20 * sizeof(DCInfo));
+  list->head = NULL;
+  for(int i = 1; i <= 5; i++)
+  {
+    DCInfo* currentNode = createAndSetNode(i);
+    insertNodeToList(list, currentNode);
+  }
+
+  killTheThing(list, 0);
+
   free(list);
 }

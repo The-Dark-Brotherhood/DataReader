@@ -183,9 +183,34 @@ void checkInactivity(MasterList* list)
 		{
 			deleteNode(list, tracker);
 			list->numberOfDCs--;
+			printf("#%d Deleted\n", tracker->dcProcessID);
 		}
 		tracker = tracker->next;
 	}
+}
+
+// FUNCTION      : getElementAt
+// DESCRIPTION   : Gets the element at index
+//
+// PARAMETERS    :
+//	MasterList* list : Pointer to the shared memory master list
+//	int index : index of the element we are getting
+//
+// RETURNS       :
+//	Pointer to client node
+DCInfo* getElementAt(MasterList* list, int index)
+{
+	if(list->numberOfDCs == 0)
+	{
+		return NULL;
+	}
+
+	DCInfo* tracker = list->head;
+	for(int counter = 0; counter < index && tracker != NULL; counter++)
+	{
+		tracker = tracker->next;
+	}
+	return tracker;
 }
 
 // FUNCTION      : deleteNode

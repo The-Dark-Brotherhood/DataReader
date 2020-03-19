@@ -1,6 +1,7 @@
 #include "../inc/dataReader.h"
 // DEBUG: REMOVE ALL PRINTF
 
+
 int main(int argc, char const *argv[])
 {
   // MESSAGE QUEUE;
@@ -70,23 +71,26 @@ int main(int argc, char const *argv[])
   int msgSize = sizeof(msgData) - sizeof(long);
 
   time_t startTime = time(NULL);                      // Listen for messages loop
-  while((int)difftime(time(NULL), startTime) < EXIT_DELAY)
+  while((int)difftime(time(NULL), startTime) < 1000)
   {
     DCInfo* currentClient = NULL;
 
     // Process messages if received and it is able to add to the master list
     if(msgrcv(msgID, &msg, msgSize, 0, IPC_NOWAIT) != -1 &&
-    (currentClient = insertNodeToList(shList, createAndSetNode(msg.clientId))))
+      (currentClient = insertNodeToList(shList, createAndSetNode(msg.clientId))))
     {
       checkInactivity(shList);
       if(msg.msgStatus == EXIT_CODE)
       {
         deleteNode(shList, currentClient);
+        printf("#%d -- Client Removed\n", msg.clientId);
       }
+      printf("==> Message Status: %d\n", msg.msgStatus); //DEBUG: Remove
       sleep(MSG_DELAY);
       startTime = time(NULL);
     }
   }
+  printLists(shList->head);
 
   // Clean up and exit
   msgctl (msgID, IPC_RMID, (struct msqid_ds*)NULL);
