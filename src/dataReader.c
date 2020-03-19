@@ -1,11 +1,11 @@
 #include "../inc/dataReader.h"
-
+// DEBUG: REMOVE ALL PRINTF
 
 int main(int argc, char const *argv[])
 {
   // MESSAGE QUEUE;
   // Generate key
-  key_t msgKey = ftok(KEY_PATH, 'G');
+  key_t msgKey = ftok(KEY_PATH, 'G');         // DEBUG: Maybe change the KEY_PATH
   int msgID = 0;
 
   if(msgKey == ID_ERROR)
@@ -73,12 +73,14 @@ int main(int argc, char const *argv[])
   while((int)difftime(time(NULL), startTime) < 20)    // DEBUG: Change to timeout
   {
     // Process messages if received and it is able to add to the master list
-    if(msgrcv(msgID, &msg, msgSize, 10, IPC_NOWAIT) != -1 &&
-       insertNodeToList(shList, createAndSetNode(msg.clientId)))    // DEBUG: Change message type (10)
+    if(msgrcv(msgID, &msg, msgSize, 0, IPC_NOWAIT) != -1 &&
+       insertNodeToList(shList, createAndSetNode(msg.clientId)))    // DEBUG: Change message type ??
     {
-      //printLists(shList->head);
       checkInactivity(shList);
-      printf("==> Wait for %.2f sec\n", MSG_DELAY);
+      if(msg->msgType == EXIT_CODE)
+      {
+        deleteNode();
+      }
       sleep(MSG_DELAY);
       startTime = time(NULL);
     }
@@ -87,6 +89,7 @@ int main(int argc, char const *argv[])
   // Clean up and exit
   // DEBUG: Clean up the shared memory heap allocation
   msgctl (msgID, IPC_RMID, (struct msqid_ds*)NULL);
+  freeLinkedList(shList->head);
   shmdt(shList);
   shmctl (shmID, IPC_RMID, 0);
 
