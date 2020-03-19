@@ -5,7 +5,7 @@ int main(int argc, char const *argv[])
 {
   // MESSAGE QUEUE;
   // Generate key
-  key_t msgKey = ftok(KEY_PATH, 'G');         // DEBUG: Maybe change the KEY_PATH
+  key_t msgKey = ftok(KEY_PATH, 'G');
   int msgID = 0;
 
   if(msgKey == ID_ERROR)
@@ -70,24 +70,20 @@ int main(int argc, char const *argv[])
   int msgSize = sizeof(msgData) - sizeof(long);
 
   time_t startTime = time(NULL);                      // Listen for messages loop
-  while((int)difftime(time(NULL), startTime) < 20)    // DEBUG: Change to timeout
+  while((int)difftime(time(NULL), startTime) < EXIT_DELAY)
   {
     // Process messages if received and it is able to add to the master list
     if(msgrcv(msgID, &msg, msgSize, 0, IPC_NOWAIT) != -1 &&
-       insertNodeToList(shList, createAndSetNode(msg.clientId)))    // DEBUG: Change message type ??
+       insertNodeToList(shList, createAndSetNode(msg.clientId)))
     {
       checkInactivity(shList);
-      if(msg->msgType == EXIT_CODE)
-      {
-        deleteNode();
-      }
+
       sleep(MSG_DELAY);
       startTime = time(NULL);
     }
   }
 
   // Clean up and exit
-  // DEBUG: Clean up the shared memory heap allocation
   msgctl (msgID, IPC_RMID, (struct msqid_ds*)NULL);
   freeLinkedList(shList->head);
   shmdt(shList);

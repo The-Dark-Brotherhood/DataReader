@@ -12,24 +12,23 @@
 #include <sys/shm.h>
 
 // Constants
-#define KEY_PATH     "/home/gabsantana/Downloads"
+#define KEY_PATH     "/tmp/"
 #define ID_ERROR      -1
 
 #define SHM_KEYID     16535
 
-// in seconds // DEBUG: Change values to reflect requirements
-#define TIMEOUT       5
-#define EXIT_DELAY    35      // Check if this is right for closing the server
+// in seconds
+#define TIMEOUT       15
+#define EXIT_DELAY    35      // DEBUG: Check if this is right for closing the server
 #define MSG_DELAY     1.5
 
 // Structures
 //--> Message QUEUE
-#define MSG_LEN 121
 typedef struct
 {
   long msgType;
   pid_t clientId;
-  char msgContent[MSG_LEN];
+  int msgStatus;
 } msgData;
 
 //--> Shared Memory
@@ -37,7 +36,7 @@ typedef struct
 typedef struct DCInfo
 {
   pid_t dcProcessID;
-  time_t lastTimeHeardFrom;   // TODO: Not sure if this the best data type for that
+  time_t lastTimeHeardFrom;
 
   struct DCInfo* next;
   struct DCInfo* prev;
@@ -52,8 +51,7 @@ typedef struct
 } MasterList;
 
 
-
-// Linked List
+// Function Prototypes
 DCInfo* createAndSetNode(int clientId);
 void printLists(DCInfo* head);
 DCInfo* findClient(DCInfo* head, int clientId);
