@@ -40,16 +40,17 @@ DCInfo* createAndSetNode(int clientId)
 }
 
 // FUNCTION      : insertNodeToList
-// DESCRIPTION   : Insert a node in a ascending client ID order
+// DESCRIPTION   : Insert a node in a ascending client ID order or Updates there
+//								 existing client timer
 //
 // PARAMETERS    :
 //	MasterList* list : List containing information about all server clients
 //  DCInfo*  node   : Pointer to the node that is being inserted
 //
 // RETURNS       :
-//	Returns -1 if the server list is full, 2 if the element already exists and its time
-//  was updated, 1 if the element was added to the list
-int insertNodeToList(MasterList* list, DCInfo* node)
+//	Returns a pointer to the node if it was added or already existed,
+//  NULL if the server is full
+DCInfo* insertNodeToList(MasterList* list, DCInfo* node)
 {
   // Memory location of the beginning and end of the list
   DCInfo** head = &(list->head);
@@ -65,6 +66,7 @@ int insertNodeToList(MasterList* list, DCInfo* node)
 	else if((*head)->dcProcessID == node->dcProcessID)
 	{
 		(*head)->lastTimeHeardFrom = time(NULL);
+		return (*head);
 	}
 	// New node that goes in the beginning of the list --> Replace head node
 	else if (node->dcProcessID < (*head)->dcProcessID)
@@ -85,10 +87,10 @@ int insertNodeToList(MasterList* list, DCInfo* node)
     // Transverse through the list
 		while (postNode != NULL && postNode->dcProcessID <= node->dcProcessID)
 		{
-			if(postNode->dcProcessID == node->dcProcessID)
+			if(postNode->dcProcessID == node->dcProcessID)	// Reset timer if client already exists
 			{
 				postNode->lastTimeHeardFrom = time(NULL);
-				return 2;
+				return postNode;
 			}
 			preNode  = postNode;
 			postNode = preNode->next;
@@ -97,7 +99,7 @@ int insertNodeToList(MasterList* list, DCInfo* node)
     // Check if the server is full
    if(list->numberOfDCs == MAX_DC_ROLES)
    {
-     return -1;
+     return NULL;
    }
 
     // Link to the list
@@ -114,7 +116,7 @@ int insertNodeToList(MasterList* list, DCInfo* node)
 		}
     list->numberOfDCs++;       // Update number of clients
 	}
-  return 1;
+  return node;
 }
 
 // FUNCTION      : printLists
