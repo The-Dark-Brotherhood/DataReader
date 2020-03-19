@@ -70,13 +70,13 @@ int main(int argc, char const *argv[])
   int msgSize = sizeof(msgData) - sizeof(long);
 
   time_t startTime = time(NULL);                      // Listen for messages loop
-  while((int)difftime(time(NULL), startTime) < 10)    // DEBUG: Change to timeout
+  while((int)difftime(time(NULL), startTime) < 20)    // DEBUG: Change to timeout
   {
     // Process messages if received and it is able to add to the master list
-    if(msgrcv(msgID, &msg, msgSize, 10, IPC_NOWAIT) != -1 &&    // DEBUG: Change message type (10)
-       addToMasterlist(msg.clientId, shList) != -1)
+    if(msgrcv(msgID, &msg, msgSize, 10, IPC_NOWAIT) != -1 &&
+       insertNodeToList(shList, createAndSetNode(msg.clientId)))    // DEBUG: Change message type (10)
     {
-      processMessage(shList, msg);
+      //printLists(shList->head);
       checkInactivity(shList);
       printf("==> Wait for %.2f sec\n", MSG_DELAY);
       sleep(MSG_DELAY);
@@ -85,7 +85,7 @@ int main(int argc, char const *argv[])
   }
 
   // Clean up and exit
-  // DEBUG: Add the shared memory here later
+  // DEBUG: Clean up the shared memory heap allocation
   msgctl (msgID, IPC_RMID, (struct msqid_ds*)NULL);
   shmdt(shList);
   shmctl (shmID, IPC_RMID, 0);

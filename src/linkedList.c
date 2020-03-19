@@ -7,7 +7,7 @@
 *                  This file contains the definitions for the functionsto linked list implementations
 */
 #include "../inc/dataReader.h"
-bool ascendingComp(DCInfo* tracker, DCInfo* node);      // Sorting parameter
+
 
 // FUNCTION      : createAndSetNode
 // DESCRIPTION   : Creates a node in the heap and stores client info in the created node
@@ -47,8 +47,8 @@ DCInfo* createAndSetNode(int clientId)
 //  DCInfo*  node   : Pointer to the node that is being inserted
 //
 // RETURNS       :
-//	Returns -1 if the server list is full, 1 if the element already exists and its time
-//  was updated, 0 if the element was added to the list
+//	Returns -1 if the server list is full, 2 if the element already exists and its time
+//  was updated, 1 if the element was added to the list
 int insertNodeToList(MasterList* list, DCInfo* node)
 {
   // Memory location of the beginning and end of the list
@@ -88,7 +88,7 @@ int insertNodeToList(MasterList* list, DCInfo* node)
 			if(postNode->dcProcessID == node->dcProcessID)
 			{
 				postNode->lastTimeHeardFrom = time(NULL);
-				return 1;
+				return 2;
 			}
 			preNode  = postNode;
 			postNode = preNode->next;
@@ -114,7 +114,7 @@ int insertNodeToList(MasterList* list, DCInfo* node)
 		}
     list->numberOfDCs++;       // Update number of clients
 	}
-  return 0;
+  return 1;
 }
 
 // FUNCTION      : printLists
@@ -163,13 +163,35 @@ DCInfo* findClient(DCInfo* head, int clientId)
 	return tracker;
 }
 
+// FUNCTION      : checkInactivity
+// DESCRIPTION   : Deletes an innactivity client from the server list
+//
+// PARAMETERS    :
+//	MasterList* list : Pointer to the shared memory master list
+//
+// RETURNS       :
+//	void
+void checkInactivity(MasterList* list)
+{
+	DCInfo* tracker = list->head;
+
+	while (tracker != NULL)
+	{
+		if((int)difftime(time(NULL), tracker->lastTimeHeardFrom) >= EXIT_DELAY)		//DEBUG: Change delay
+		{
+			deleteNode(list, tracker);
+			list->numberOfDCs--;
+		}
+		tracker = tracker->next;
+	}
+}
+
 // FUNCTION      : deleteNode
 // DESCRIPTION   : Deletes a particular node from a list
 //
 // PARAMETERS    :
-//	songInfo* node  : Pointer to the node that is going to be deleted
-//	songInfo** head : Pointer to the memory location of beginning of the linked list
-//  songInfo** tail : Pointer to the memory location of the end of the linked list
+//	DCInfo* node     : Pointer to the node that is going to be deleted
+//	MasterList* list : Pointer to the shared memory master list
 //
 // RETURNS       :
 //	NOTHING

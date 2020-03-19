@@ -19,7 +19,7 @@
 
 // in seconds // DEBUG: Change values to reflect requirements
 #define TIMEOUT       5
-#define EXIT_DELAY    15      // Check if this is right for closing the server
+#define EXIT_DELAY    35      // Check if this is right for closing the server
 #define MSG_DELAY     1.5
 
 // Structures
@@ -51,12 +51,7 @@ typedef struct
   DCInfo* tail;
 } MasterList;
 
-// Function Prototypes
-/*
-void processMessage(MasterList* list, msgData msg);
-int addToMasterlist(pid_t newClientPID, MasterList* list);
-void checkInactivity(MasterList* list);
-*/
+
 
 // Linked List
 DCInfo* createAndSetNode(int clientId);
@@ -65,3 +60,4 @@ DCInfo* findClient(DCInfo* head, int clientId);
 int insertNodeToList(MasterList* list, DCInfo* node);
 void deleteNode(MasterList* list, DCInfo* node);
 void freeLinkedList(DCInfo* head);
+void checkInactivity(MasterList* list);
