@@ -72,12 +72,17 @@ int main(int argc, char const *argv[])
   time_t startTime = time(NULL);                      // Listen for messages loop
   while((int)difftime(time(NULL), startTime) < EXIT_DELAY)
   {
+    DCInfo* currentClient = NULL;
+
     // Process messages if received and it is able to add to the master list
     if(msgrcv(msgID, &msg, msgSize, 0, IPC_NOWAIT) != -1 &&
-       insertNodeToList(shList, createAndSetNode(msg.clientId)))
+    (currentClient = insertNodeToList(shList, createAndSetNode(msg.clientId))))
     {
       checkInactivity(shList);
-
+      if(msg.msgStatus == EXIT_CODE)
+      {
+        deleteNode(shList, currentClient);
+      }
       sleep(MSG_DELAY);
       startTime = time(NULL);
     }

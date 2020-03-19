@@ -14,8 +14,8 @@
 // Constants
 #define KEY_PATH     "/tmp/"
 #define ID_ERROR      -1
-
 #define SHM_KEYID     16535
+#define EXIT_CODE     6
 
 // in seconds
 #define TIMEOUT       15
