@@ -9,6 +9,7 @@ void testAddFullList();
 void testListDeleteElement();
 void testListDeleteFirstElement();
 void testListDeleteLastElement();
+void testListInactivityRemoval();
 
 int main(void)
 {
@@ -20,6 +21,7 @@ int main(void)
   testListDeleteElement();
   testListDeleteFirstElement();
   testListDeleteLastElement();
+  testListInactivityRemoval();
 
   return 0;
 }
@@ -28,8 +30,8 @@ void testListNewElementBegin()
 {
   // Create list
   printf("======\nTEST : Add a new element at the beginning of the list\n");
-  printf("Returns -1 if the server list is full, \n1 if the element already exists and its time was updated\n");
-  printf("0 if the element was added to the list\n======\n");
+  printf("Returns -1 if the server list is full, \n2 if the element already exists and its time was updated\n");
+  printf("1 if the element was added to the list\n======\n");
 
   // Create and insert dummy data
   MasterList* list = malloc(20 * sizeof(DCInfo));
@@ -44,7 +46,7 @@ void testListNewElementBegin()
   DCInfo* node = createAndSetNode(1);
   int retCode = insertNodeToList(list, node);
 
-  printf("==> Expected: 0 -- Result: %d\n\n", retCode);
+  printf("==> Expected: 1 -- Result: %d\n\n", retCode);
   free(list);
 }
 
@@ -52,8 +54,8 @@ void testListExistingElement()
 {
   // Create list
   printf("======\nTEST : Add an element that already exists\n");
-  printf("Returns -1 if the server list is full, \n1 if the element already exists and its time was updated\n");
-  printf("0 if the element was added to the list\n======\n");
+  printf("Returns -1 if the server list is full, \n2 if the element already exists and its time was updated\n");
+  printf("1 if the element was added to the list\n======\n");
 
   // Create and insert dummy data
   MasterList* list = malloc(20 * sizeof(DCInfo));
@@ -68,7 +70,7 @@ void testListExistingElement()
   DCInfo* node = createAndSetNode(5);
   int retCode = insertNodeToList(list, node);
 
-  printf("==> Expected: 1 -- Result: %d\n\n", retCode);
+  printf("==> Expected: 2 -- Result: %d\n\n", retCode);
   free(list);
 }
 
@@ -76,8 +78,8 @@ void testAddFullList()
 {
   // Create list
   printf("======\nTEST : Add an element to a full list\n");
-  printf("Returns -1 if the server list is full, \n1 if the element already exists and its time was updated\n");
-  printf("0 if the element was added to the list\n======\n");
+  printf("Returns -1 if the server list is full, \n2 if the element already exists and its time was updated\n");
+  printf("1 if the element was added to the list\n======\n");
 
   // Create and insert dummy data
   MasterList* list = malloc(20 * sizeof(DCInfo));
@@ -100,8 +102,8 @@ void testListNewElementEnd()
 {
   // Create list
   printf("======\nTEST : Add a new element in the end of the list\n");
-  printf("Returns -1 if the server list is full, \n1 if the element already exists and its time was updated\n");
-  printf("0 if the element was added to the list\n======\n");
+  printf("Returns -1 if the server list is full, \n2 if the element already exists and its time was updated\n");
+  printf("1 if the element was added to the list\n======\n");
 
   // Create and insert dummy data
   MasterList* list = malloc(20 * sizeof(DCInfo));
@@ -116,7 +118,7 @@ void testListNewElementEnd()
   DCInfo* node = createAndSetNode(6);
   int retCode = insertNodeToList(list, node);
 
-  printf("==> Expected: 0 -- Result: %d\n\n", retCode);
+  printf("==> Expected: 1 -- Result: %d\n\n", retCode);
   free(list);
 }
 
@@ -124,8 +126,8 @@ void testListNewElementMiddle()
 {
   // Create list
   printf("======\nTEST : Add a new element in the middle of the list\n");
-  printf("Returns -1 if the server list is full, \n1 if the element already exists and its time was updated\n");
-  printf("0 if the element was added to the list\n======\n");
+  printf("Returns -1 if the server list is full, \n2 if the element already exists and its time was updated\n");
+  printf("1 if the element was added to the list\n======\n");
 
   // Create and insert dummy data
   MasterList* list = malloc(20 * sizeof(DCInfo));
@@ -143,7 +145,7 @@ void testListNewElementMiddle()
   DCInfo* node = createAndSetNode(6);
   int retCode = insertNodeToList(list, node);
 
-  printf("==> Expected: 0 -- Result: %d\n\n", retCode);
+  printf("==> Expected: 1 -- Result: %d\n\n", retCode);
   free(list);
 }
 
@@ -223,5 +225,27 @@ void testListDeleteLastElement()
   printLists(list->head);
   printf("Expected: 4 -- Result: %d\n\n", list->numberOfDCs );
 
+  free(list);
+}
+
+void testListInactivityRemoval()
+{
+  // Create list
+  printf("======\nTEST : Remove inactive client from the list\n");
+  printf("Returns the number of clients removed from the list \n");
+
+  // Create and insert dummy data with delay
+  MasterList* list = malloc(20 * sizeof(DCInfo));
+  list->head = NULL;
+  for(int i = 1; i <= 5; i++)
+  {
+    DCInfo* currentNode = createAndSetNode(i);
+    insertNodeToList(list, currentNode);
+    sleep(5);
+  }
+
+  checkInactivity(list);
+  printLists(list->head);
+  printf("Change the EXIT_DELAY to observe changes\n");
   free(list);
 }
