@@ -116,6 +116,10 @@ DCInfo* insertNodeToList(MasterList* list, DCInfo* node)
 		}
     list->numberOfDCs++;       // Update number of clients
 	}
+	printf("newNode:%p\n", (void*)node);
+	printf("previous:%p\n", (void*)node->prev);
+	printf("next:%p\n", (void*)node->next);
+	printf("%d\n",(int)node->dcProcessID );
   return node;
 }
 
@@ -182,7 +186,6 @@ void checkInactivity(MasterList* list)
 		if((int)difftime(time(NULL), tracker->lastTimeHeardFrom) >= EXIT_DELAY)		//DEBUG: Change delay
 		{
 			deleteNode(list, tracker);
-			list->numberOfDCs--;
 			printf("#%d Deleted\n", tracker->dcProcessID);
 		}
 		tracker = tracker->next;

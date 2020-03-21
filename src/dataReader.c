@@ -31,7 +31,8 @@ int main(int argc, char const *argv[])
 
   // MASTER LIST;
   // Generattes key
-  key_t shmKey = ftok(KEY_PATH, SHM_KEYID);
+  key_t shmKey = ftok(SHMKEY_PATH, SHM_KEYID);
+  printf("%d\n", shmKey);
   int shmID = 0;
   if(shmKey == ID_ERROR)
   {
@@ -42,7 +43,6 @@ int main(int argc, char const *argv[])
   // Creates or Grabs shared memory
   MasterList* shList = NULL;
   shmID = shmget(shmKey, sizeof(MasterList), 0);
-  printf("DEBUG SHM ID: %d\n", shmID);
   if(shmID == -1)
   {
     shmID = shmget(shmKey, sizeof(MasterList), (IPC_CREAT | 0660));
@@ -52,6 +52,8 @@ int main(int argc, char const *argv[])
       return errno;
     }
   }
+  printf("DEBUG SHM ID: %d\n", shmID);
+
 
   /*
   //DEBUG: Clean up
@@ -62,7 +64,14 @@ int main(int argc, char const *argv[])
 
   //--> Listening loop
   shList = (MasterList*)shmat (shmID, NULL, 0);       // Grabs the shared memory and
-  shList->msgQueueID = msgID;                         // Assign the message queue ID
+  if(shList == NULL)
+  {
+    printf("THIS SHIZZ WAS NULL YO\n");
+    return 3;
+  }
+  printf("address of shared list: %p", (void*)shList);
+  shList->msgQueueID = msgID;
+  printf("%p\n", (void*)shList);                       // Assign the message queue ID
 
   printf("Waiting for %d seconds\n", TIMEOUT);        // Wait for clients to start
   sleep(TIMEOUT);
@@ -71,10 +80,10 @@ int main(int argc, char const *argv[])
   int msgSize = sizeof(msgData) - sizeof(long);
 
   time_t startTime = time(NULL);                      // Listen for messages loop
-  while((int)difftime(time(NULL), startTime) < 1000)
+  printf("before the while\n");
+  while((int)difftime(time(NULL), startTime) < 30)    //DEBUG:
   {
     DCInfo* currentClient = NULL;
-
     // Process messages if received and it is able to add to the master list
     if(msgrcv(msgID, &msg, msgSize, 0, IPC_NOWAIT) != -1 &&
       (currentClient = insertNodeToList(shList, createAndSetNode(msg.clientId))))
@@ -89,6 +98,7 @@ int main(int argc, char const *argv[])
       sleep(MSG_DELAY);
       startTime = time(NULL);
     }
+
   }
   printLists(shList->head);
 
