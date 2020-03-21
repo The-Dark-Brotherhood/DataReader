@@ -21,7 +21,7 @@
 
 // in seconds
 #define TIMEOUT       5       // DEBUG: CHANGE LATER
-#define EXIT_DELAY    10      // DEBUG: Check if this is right for closing the server
+#define EXIT_DELAY    35      // DEBUG: Check if this is right for closing the server
 #define MSG_DELAY     1.5
 
 // Structures
@@ -38,28 +38,19 @@ typedef struct
 typedef struct DCInfo
 {
   pid_t dcProcessID;
-  time_t lastTimeHeardFrom;
-
-  struct DCInfo* next;
-  struct DCInfo* prev;
+  int lastTimeHeardFrom;
 } DCInfo;
 
 typedef struct
 {
   int msgQueueID;
   int numberOfDCs;
-  DCInfo* head;
-  DCInfo* tail;
+  DCInfo dc[MAX_DC_ROLES];
 } MasterList;
 
 
 // Function Prototypes
-DCInfo* createAndSetNode(int clientId);
-void printLists(DCInfo* head);
-DCInfo* findClient(DCInfo* head, int clientId);
-DCInfo* getElementAt(MasterList* list, int index);
-DCInfo* insertNodeToList(MasterList* list, DCInfo* node, int* ptrIndex);
-void deleteNode(MasterList* list, DCInfo* node);
-void freeLinkedList(DCInfo* head);
 void checkInactivity(MasterList* list);
+void deleteNode(MasterList* list, int index);
+int insertNodeToList(MasterList* list, DCInfo client);
 void createLogMessage(DCInfo* node, int logType, int index, int msgStatus);
