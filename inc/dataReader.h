@@ -11,12 +11,14 @@
 #include <sys/ipc.h>
 #include <sys/msg.h>
 #include <sys/shm.h>
+#include <sys/sem.h>
 
 // Constants
 #define KEY_PATH     "/tmp/"
 #define ID_ERROR      -1
 #define SHM_KEYID     16535
 #define EXIT_CODE     6
+#define KEY           1337
 
 #define NEW_CLIENT        0
 #define NON_RESPONSIVE    1
@@ -61,3 +63,7 @@ int findClient(MasterList* list, pid_t id);
 
 void createLogMessage(DCInfo node, int logType, int index, int msgStatus);
 void debugLog(const char* logMessage);
+
+//the following is defined in DataCreatorLogging.h
+extern struct sembuf acquire_operation;
+extern struct sembuf release_operation;

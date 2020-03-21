@@ -5,8 +5,8 @@
 #==============================================
 
 # FINAL BINARY Target
-./bin/dataReader : ./obj/dataReader.o  ./obj/linkedList.o ./obj/logger.o
-	cc -g ./obj/dataReader.o ./obj/linkedList.o ./obj/logger.o -o  ./bin/dataReader
+./bin/DataReader : ./obj/dataReader.o  ./obj/linkedList.o ./obj/logger.o
+	cc -g ./obj/dataReader.o ./obj/linkedList.o ./obj/logger.o -o  ./bin/DataReader
 #
 # =======================================================
 #                     Dependencies

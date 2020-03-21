@@ -2,6 +2,12 @@
 // DEBUG: REMOVE ALL PRINTF
 // DEBUG: REMOVE THE DEBUGGER FLAG
 DCInfo createClient(pid_t id);
+int setUpLogSemaphore(void);
+void closeLogSemaphore(int semId);
+
+struct sembuf acquire_operation = { 0, -1, SEM_UNDO };
+struct sembuf release_operation = { 0, 1, SEM_UNDO };
+unsigned short init_values[1] = { 1 };
 
 int main(int argc, char const *argv[])
 {
@@ -105,6 +111,35 @@ int main(int argc, char const *argv[])
   shmctl (shmID, IPC_RMID, 0);
 
   return 0;
+}
+
+// FUNCTION      : setUpLogSemaphore
+// DESCRIPTION   : this function creates a semaphore that is used by the DCs
+//                 for accessing the log file.
+//
+// PARAMETERS    : none
+//
+//  RETURNS      : int - semaphore Id
+int setUpLogSemaphore(void)
+{
+  int semid = semget (KEY, 1, IPC_CREAT | 0777);
+  if (semctl (semid, 0, SETALL, init_values) == -1)
+  {
+    printf("error\n");
+  }
+  return semid;
+}
+
+// FUNCTION      : closeLogSemaphore
+// DESCRIPTION   : this function closes the semaphore being used by the DC
+//
+// PARAMETERS    : int semId - semaphore Id
+//
+//  RETURNS      : none
+void closeLogSemaphore(int semId)
+{
+  semctl (semId, 0, IPC_RMID, 0);
+
 }
 
 DCInfo createClient(pid_t id)
