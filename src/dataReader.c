@@ -1,5 +1,6 @@
 #include "../inc/dataReader.h"
 // DEBUG: REMOVE ALL PRINTF
+// DEBUG: REMOVE THE DEBUGGER FLAG
 
 
 int main(int argc, char const *argv[])
@@ -26,7 +27,6 @@ int main(int argc, char const *argv[])
       return errno;
     }
   }
-
   printf("DEBUG MESSAGE ID: %d\n", msgID );
 
   // MASTER LIST;
@@ -42,7 +42,6 @@ int main(int argc, char const *argv[])
   // Creates or Grabs shared memory
   MasterList* shList = NULL;
   shmID = shmget(shmKey, sizeof(MasterList), 0);
-  printf("DEBUG SHM ID: %d\n", shmID);
   if(shmID == -1)
   {
     shmID = shmget(shmKey, sizeof(MasterList), (IPC_CREAT | 0660));
@@ -52,6 +51,7 @@ int main(int argc, char const *argv[])
       return errno;
     }
   }
+  printf("DEBUG SHM ID: %d\n", shmID);
 
   /*
   //DEBUG: Clean up
@@ -69,6 +69,7 @@ int main(int argc, char const *argv[])
 
   msgData msg;
   int msgSize = sizeof(msgData) - sizeof(long);
+  int clientIndex = 0;
 
   time_t startTime = time(NULL);                      // Listen for messages loop
   while((int)difftime(time(NULL), startTime) < 1000)
@@ -77,13 +78,13 @@ int main(int argc, char const *argv[])
 
     // Process messages if received and it is able to add to the master list
     if(msgrcv(msgID, &msg, msgSize, 0, IPC_NOWAIT) != -1 &&
-      (currentClient = insertNodeToList(shList, createAndSetNode(msg.clientId))))
+      (currentClient = insertNodeToList(shList, createAndSetNode(msg.clientId), &clientIndex)))
     {
       checkInactivity(shList);
       if(msg.msgStatus == EXIT_CODE)
       {
         deleteNode(shList, currentClient);
-        printf("#%d -- Client Removed\n", msg.clientId);
+        createLogMessage(tracker, GO_OFFLINE, *clientIndex, 0);
       }
       printf("==> Message Status: %d\n", msg.msgStatus); //DEBUG: Remove
       sleep(MSG_DELAY);

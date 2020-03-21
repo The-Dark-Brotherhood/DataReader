@@ -7,7 +7,32 @@
 *                  This file contains the definitions for the functionsto linked list implementations
 */
 #include "../inc/dataReader.h"
+#include "../inc/logger.h"
 
+void createLogMessage(DCInfo* node, int logType, int index, int msgStatus)
+{
+  char logMessage[255] = "";
+
+  switch (logType)
+  {
+		case NEW_CLIENT:
+			sprintf("DC-YY [XXX] added to the master list – NEW DC – Status 0 (Everything is OKAY)");
+			break;
+    case MESSAGE:
+      sprintf(logMessage, "DC-%02d [%d] updated in the master list – MSG RECEIVED – Status %d (AAAAA)\n", index, node->dcProcessID, msgStatus);
+      break;
+    case NON_RESPONSIVE:
+      sprintf(logMessage, "DC-%02d [%d] removed from master list – NON-RESPONSIVE\n", index, node->dcProcessID);
+      break;
+    case GO_OFFLINE:
+      sprintf(logMessage, "DC-%02d [%d] has gone OFFLINE – removing from master-list\n", index, node->dcProcessID);
+      break;
+    case ALL_OFF:
+      sprintf(logMessage, "All DCs have gone offline or terminated – DR TERMINATING\n");
+      break;
+  }
+  writeToLog(logMessage, DR_LOG_PATH);
+}
 
 // FUNCTION      : createAndSetNode
 // DESCRIPTION   : Creates a node in the heap and stores client info in the created node
@@ -50,11 +75,12 @@ DCInfo* createAndSetNode(int clientId)
 // RETURNS       :
 //	Returns a pointer to the node if it was added or already existed,
 //  NULL if the server is full
-DCInfo* insertNodeToList(MasterList* list, DCInfo* node)
+DCInfo* insertNodeToList(MasterList* list, DCInfo* node, int* ptrIndex)
 {
   // Memory location of the beginning and end of the list
   DCInfo** head = &(list->head);
   DCInfo** tail = &(list->tail);
+	*ptrIndex = 0;
 
 	// First element case --> Server is empty
 	if (*head == NULL)
@@ -83,6 +109,7 @@ DCInfo* insertNodeToList(MasterList* list, DCInfo* node)
 		// Tracker pointers
 		DCInfo* preNode  =  *head;
 		DCInfo* postNode = (*head)->next;
+		(*ptrIndex)++;
 
     // Transverse through the list
 		while (postNode != NULL && postNode->dcProcessID <= node->dcProcessID)
@@ -94,6 +121,7 @@ DCInfo* insertNodeToList(MasterList* list, DCInfo* node)
 			}
 			preNode  = postNode;
 			postNode = preNode->next;
+			(*ptrIndex)++;
 		}
 
     // Check if the server is full
@@ -116,6 +144,7 @@ DCInfo* insertNodeToList(MasterList* list, DCInfo* node)
 		}
     list->numberOfDCs++;       // Update number of clients
 	}
+	createLogMessage(node, NEW_CLIENT, *ptrIndex, 0);
   return node;
 }
 
@@ -176,16 +205,17 @@ DCInfo* findClient(DCInfo* head, int clientId)
 void checkInactivity(MasterList* list)
 {
 	DCInfo* tracker = list->head;
+	int index = 0;
 
 	while (tracker != NULL)
 	{
 		if((int)difftime(time(NULL), tracker->lastTimeHeardFrom) >= EXIT_DELAY)		//DEBUG: Change delay
 		{
 			deleteNode(list, tracker);
-			list->numberOfDCs--;
-			printf("#%d Deleted\n", tracker->dcProcessID);
+			createLogMessage(tracker, NON_RESPONSIVE, index, 0);
 		}
 		tracker = tracker->next;
+		index++;
 	}
 }
 

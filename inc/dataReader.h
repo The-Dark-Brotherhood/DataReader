@@ -18,6 +18,7 @@
 #define SHM_KEYID     16535
 #define EXIT_CODE     6
 
+
 // in seconds
 #define TIMEOUT       5       // DEBUG: CHANGE LATER
 #define EXIT_DELAY    10      // DEBUG: Check if this is right for closing the server
@@ -57,7 +58,8 @@ DCInfo* createAndSetNode(int clientId);
 void printLists(DCInfo* head);
 DCInfo* findClient(DCInfo* head, int clientId);
 DCInfo* getElementAt(MasterList* list, int index);
-DCInfo* insertNodeToList(MasterList* list, DCInfo* node);
+DCInfo* insertNodeToList(MasterList* list, DCInfo* node, int* ptrIndex);
 void deleteNode(MasterList* list, DCInfo* node);
 void freeLinkedList(DCInfo* head);
 void checkInactivity(MasterList* list);
+void createLogMessage(DCInfo* node, int logType, int index, int msgStatus);
