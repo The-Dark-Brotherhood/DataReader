@@ -12,8 +12,8 @@
 #                     Dependencies
 # =======================================================
 
-./obj/dataReader.o : ./src/test.c ./inc/dataReader.h
-	cc -g -c ./src/test.c -o  ./obj/dataReader.o
+./obj/dataReader.o : ./src/dataReader.c ./inc/dataReader.h
+	cc -g -c ./src/dataReader.c -o  ./obj/dataReader.o
 
 ./obj/logger.o : ./src/logger.c ./inc/logger.h
 		cc -g -c ./src/logger.c -o  ./obj/logger.o

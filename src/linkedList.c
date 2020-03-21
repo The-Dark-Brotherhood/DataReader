@@ -9,7 +9,7 @@
 #include "../inc/dataReader.h"
 #include "../inc/logger.h"
 
-/*
+
 void createLogMessage(DCInfo node, int logType, int index, int msgStatus)
 {
   char logMessage[255] = "";
@@ -17,7 +17,7 @@ void createLogMessage(DCInfo node, int logType, int index, int msgStatus)
   switch (logType)
   {
 		case NEW_CLIENT:
-			sprintf("DC-YY [XXX] added to the master list – NEW DC – Status 0 (Everything is OKAY)");
+			sprintf(logMessage,"DC-%02d [%d] added to the master list – NEW DC – Status 0 (Everything is OKAY)", index, node.dcProcessID);
 			break;
     case MESSAGE:
       sprintf(logMessage, "DC-%02d [%d] updated in the master list – MSG RECEIVED – Status %d (AAAAA)\n", index, node.dcProcessID, msgStatus);
@@ -28,13 +28,14 @@ void createLogMessage(DCInfo node, int logType, int index, int msgStatus)
     case GO_OFFLINE:
       sprintf(logMessage, "DC-%02d [%d] has gone OFFLINE – removing from master-list\n", index, node.dcProcessID);
       break;
-    case ALL_OFF:
-      sprintf(logMessage, "All DCs have gone offline or terminated – DR TERMINATING\n");
-      break;
   }
   writeToLog(logMessage, DR_LOG_PATH);
 }
-*/
+
+void debugLog(const char* logMessage)
+{
+  writeToLog((char*)logMessage, DR_LOG_PATH);
+}
 
 
 // FUNCTION      : insertNodeToList
@@ -51,7 +52,7 @@ void createLogMessage(DCInfo node, int logType, int index, int msgStatus)
 int insertNodeToList(MasterList* list, DCInfo client)
 {
   // Check if the client is already on the list
-  for(int counter = 0; counter < MAX_DC_ROLES; counter++)
+  for(int counter = 0; counter < list->numberOfDCs; counter++)
   {
     if(client.dcProcessID == list->dc[counter].dcProcessID)
     {
@@ -68,10 +69,22 @@ int insertNodeToList(MasterList* list, DCInfo client)
 
   // Else, add new client
   list->dc[list->numberOfDCs] = client;
+  createLogMessage(client, NEW_CLIENT, list->numberOfDCs, 0);
   list->numberOfDCs++;
-	//createLogMessage(node, NEW_CLIENT, *ptrIndex, 0);
 
   return 1;
+}
+
+int findClient(MasterList* list, pid_t id)
+{
+  for(int counter = 0; counter < list->numberOfDCs; counter++)
+  {
+    if(list->dc[counter].dcProcessID == id)
+    {
+      return counter;
+    }
+  }
+  return -1;
 }
 
 // FUNCTION      : checkInactivity
@@ -91,6 +104,7 @@ void checkInactivity(MasterList* list)
     //(int)difftime(time(NULL), list->dc[counter].lastTimeHeardFrom)
 		if(list->dc[counter].lastTimeHeardFrom >= EXIT_DELAY)		//DEBUG: Change delay
 		{
+      createLogMessage(list->dc[counter], NON_RESPONSIVE, counter, 0);
 			// Replace the deleted object with last element
       int lastIndex = list->numberOfDCs - 1;
       if(lastIndex != counter)
@@ -98,7 +112,6 @@ void checkInactivity(MasterList* list)
         list->dc[counter] = list->dc[lastIndex];
       }
       deleteNode(list, lastIndex);
-			//createLogMessage(tracker, NON_RESPONSIVE, index, 0);
 		}
     else
     {

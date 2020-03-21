@@ -18,6 +18,10 @@
 #define SHM_KEYID     16535
 #define EXIT_CODE     6
 
+#define NEW_CLIENT        0
+#define NON_RESPONSIVE    1
+#define MESSAGE           2
+#define GO_OFFLINE        3
 
 // in seconds
 #define TIMEOUT       5       // DEBUG: CHANGE LATER
@@ -53,4 +57,7 @@ typedef struct
 void checkInactivity(MasterList* list);
 void deleteNode(MasterList* list, int index);
 int insertNodeToList(MasterList* list, DCInfo client);
-void createLogMessage(DCInfo* node, int logType, int index, int msgStatus);
+int findClient(MasterList* list, pid_t id);
+
+void createLogMessage(DCInfo node, int logType, int index, int msgStatus);
+void debugLog(const char* logMessage);

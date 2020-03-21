@@ -22,13 +22,6 @@
 #define LOG_LEN         256
 
 
-#define NEW_CLIENT        0
-#define NON_RESPONSIVE    1
-#define GO_OFFLINE        2
-#define ALL_OFF           3
-
-
-
 // Function Prototypes
 void getTime(char* output);
 void createFilePathIfNotExists();

@@ -1,7 +1,7 @@
 #include "../inc/dataReader.h"
 // DEBUG: REMOVE ALL PRINTF
 // DEBUG: REMOVE THE DEBUGGER FLAG
-
+DCInfo createClient(pid_t id);
 
 int main(int argc, char const *argv[])
 {
@@ -12,7 +12,7 @@ int main(int argc, char const *argv[])
 
   if(msgKey == ID_ERROR)
   {
-    printf("ERROR: Unable to generate a key for message queue\n");
+    debugLog("ERROR: Unable to generate a key for message queue\n");
     return ID_ERROR;
   }
 
@@ -23,7 +23,7 @@ int main(int argc, char const *argv[])
     msgID = msgget(msgKey, (IPC_CREAT | 0660));
     if(msgID == -1)
     {
-      printf("ERROR: Unable to create queue\n%s\n", strerror(errno));
+      debugLog(strerror(errno));
       return errno;
     }
   }
@@ -35,7 +35,7 @@ int main(int argc, char const *argv[])
   int shmID = 0;
   if(shmKey == ID_ERROR)
   {
-    printf("ERROR: Unable to gsenerate a key for shared memory\n");
+    debugLog("ERROR: Unable to generate a key for shared memory\n");
     return ID_ERROR;
   }
 
@@ -47,7 +47,7 @@ int main(int argc, char const *argv[])
     shmID = shmget(shmKey, sizeof(MasterList), (IPC_CREAT | 0660));
     if(shmID == -1)
     {
-      printf("ERROR: Unable to create shared memory\n%s\n", strerror(errno));
+      debugLog(strerror(errno));
       return errno;
     }
   }
@@ -64,40 +64,51 @@ int main(int argc, char const *argv[])
   shList = (MasterList*)shmat (shmID, NULL, 0);       // Grabs the shared memory and
   shList->msgQueueID = msgID;                         // Assign the message queue ID
 
-  printf("Waiting for %d seconds\n", TIMEOUT);        // Wait for clients to start
+  // Wait for clients to start
   sleep(TIMEOUT);
 
   msgData msg;
   int msgSize = sizeof(msgData) - sizeof(long);
-  int clientIndex = 0;
 
   time_t startTime = time(NULL);                      // Listen for messages loop
-  while((int)difftime(time(NULL), startTime) < 1000)
+  while((int)difftime(time(NULL), startTime) < EXIT_DELAY)
   {
-    DCInfo* currentClient = NULL;
-
-    // Process messages if received and it is able to add to the master list
+    // Process messages if received AND if it is able to add client or it already exists in shList
     if(msgrcv(msgID, &msg, msgSize, 0, IPC_NOWAIT) != -1 &&
-      (currentClient = insertNodeToList(shList, createAndSetNode(msg.clientId), &clientIndex)))
+      insertNodeToList(shList, createClient(msg.clientId)))
     {
+      // I dont error check findClient because the check above already guarantees
+      // that a client with that Id exists
       checkInactivity(shList);
+      int currentClient = findClient(shList, msg.clientId);
+
       if(msg.msgStatus == EXIT_CODE)
       {
         deleteNode(shList, currentClient);
-        createLogMessage(tracker, GO_OFFLINE, *clientIndex, 0);
+        createLogMessage(shList->dc[currentClient], GO_OFFLINE, currentClient, 0);
       }
-      printf("==> Message Status: %d\n", msg.msgStatus); //DEBUG: Remove
+      else
+      {
+        createLogMessage(shList->dc[shList->numberOfDCs], NEW_CLIENT, shList->numberOfDCs, msg.msgStatus);
+      }
+
+      // Delay and reset time since last message
       sleep(MSG_DELAY);
       startTime = time(NULL);
     }
   }
-  printLists(shList->head);
 
   // Clean up and exit
+  debugLog("All DCs have gone offline or terminated – DR TERMINATING\n");
   msgctl (msgID, IPC_RMID, (struct msqid_ds*)NULL);
-  freeLinkedList(shList->head);
   shmdt(shList);
   shmctl (shmID, IPC_RMID, 0);
 
   return 0;
+}
+
+DCInfo createClient(pid_t id)
+{
+  DCInfo client = {.dcProcessID = id, .lastTimeHeardFrom = time(NULL)};
+  return client;
 }
